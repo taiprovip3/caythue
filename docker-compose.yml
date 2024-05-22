@@ -1,0 +1,50 @@
+version: '3.8'
+services:
+  mysql: #service 1
+    image: mysql:latest
+    container_name: mysql_container
+    environment:
+      MYSQL_ROOT_PASSWORD: sapassword
+      MYSQL_DATABASE: qlsv
+      MYSQL_USER: sa
+      MYSQL_PASSWORD: sapassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - my_network
+
+  dbeaver: #service 2
+    image: dbeaver/cloudbeaver:latest
+    container_name: dbeaver_container
+    ports:
+      - "8978:8978"
+    environment:
+      CB_ADMIN_NAME: cbadmin
+      CB_ADMIN_PASSWORD: 315067680Az_
+    depends_on:
+      - mysql
+    networks:
+      - my_network
+
+  springboot_app: #service 3
+    build:
+      context: ./springboot
+      dockerfile: Dockerfile
+    container_name: springboot_container
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      - mysql
+    networks:
+      - my_network
+
+volumes:
+  mysql_data:
+
+networks:
+  my_network:
+    driver: bridge
